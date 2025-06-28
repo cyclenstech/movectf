@@ -29,6 +29,8 @@ COPY move_contract /app/move_contract/
 
 RUN git clone https://github.com/MystenLabs/sui.git /app/sui
 
+RUN cd /app/move_contract && sui move build
+
 # 复制入口点脚本并设置权限
 COPY service/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh

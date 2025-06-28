@@ -11,8 +11,6 @@ chmod 744 /uuid
 
 chmod -R 755 /app
 
-# build move 合约
-cd /app/move_contract && sui move build
 
 # 启动Flask应用交互
 cd /app && python3 app.py

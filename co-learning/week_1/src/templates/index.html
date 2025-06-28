@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flag校验终端</title>
+    <!-- 引入 Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            text-align: left;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        .btn {
+            background-color: #4f46e5;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .btn:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+        }
+        .message {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 1.05rem;
+        }
+        .message.success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .message.error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="container bg-white p-8 rounded-xl shadow-lg">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">MOVE CTF 共学 - Task_1</h1>
+        <p class="text-lg text-gray-600 mb-8">
+            下面是你的 <strong class="text-indigo-600">Github_ID</strong>：<br>
+            <span class="text-xl font-mono bg-gray-100 p-2 rounded-md inline-block mt-2">{{ github_id }}</span>
+        </p>
+        <p class="text-gray-700 mb-6">
+            您需要将此 ID 作为你合约调用的参数来校验身份。<br>
+            当你完成挑战后，在下面提交你的交易哈希以及合约返回的 FLAG，通过验证后，即可获得最终 Flag。
+        </p>
+
+        <form method="POST" action="/" class="w-full">
+            <div class="input-group mb-4">
+                <label for="tx_digest" class="block text-gray-700 text-sm font-bold mb-2">交易哈希 (Transaction Hash):</label>
+                <input type="text" id="tx_digest" name="tx_digest" placeholder="请输入你的交易哈希"
+                       class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200">
+            </div>
+            <div class="input-group mb-6">
+                <label for="contract_flag_input" class="block text-gray-700 text-sm font-bold mb-2">合约返回的 FLAG (Contract Returned FLAG):</label>
+                <input type="text" id="contract_flag_input" name="contract_flag_input" placeholder="请输入合约返回的 FLAG"
+                       class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200">
+            </div>
+            <button type="submit" class="btn">提交验证</button>
+        </form>
+
+        {% if result_message %}
+            <div class="message {% if '恭喜' in result_message %}success{% else %}error{% endif %}">
+                {{ result_message | safe }}
+            </div>
+        {% endif %}
+
+        {% if flag_message %}
+            <div class="message success mt-4">
+                {{ flag_message | safe }}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

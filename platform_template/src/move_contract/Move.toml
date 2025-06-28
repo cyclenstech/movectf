@@ -1,0 +1,2 @@
+[dependencies]
+Sui = { local = "/app/sui/crates/sui-framework/packages/sui-framework" }

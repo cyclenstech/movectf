@@ -27,7 +27,6 @@ WORKDIR /app
 COPY src/ /app/
 COPY move_contract /app/move_contract/
 
-# 下载 sui 框架依赖
 RUN git clone https://github.com/MystenLabs/sui.git /app/sui
 
 # 复制入口点脚本并设置权限

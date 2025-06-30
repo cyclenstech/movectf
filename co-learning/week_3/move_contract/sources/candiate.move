@@ -1,5 +1,5 @@
 
-module bribery_voting::candidates;
+module bribery_voting::candidate;
 
 use bribery_voting::ballot::{VoteRequest};
 
@@ -32,6 +32,16 @@ public fun vote(
     request: &mut VoteRequest,
     amount: u64,
 ) {
-    let gain_votes = request.deduct_voting_power(amount);
+    let gain_votes = request.deduct_voting_power(candiate.account, amount);
     candiate.total_votes = candiate.total_votes + gain_votes;
+}
+
+/// Getter Funs
+
+public fun account(candiate: &Candidate): address {
+    candiate.account
+}
+
+public fun total_votes(candiate: &Candidate): u64 {
+    candiate.total_votes
 }

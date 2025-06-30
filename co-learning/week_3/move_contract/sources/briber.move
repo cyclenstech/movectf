@@ -1,7 +1,7 @@
-module bribery_voting::birber;
+module bribery_voting::briber;
 
 use std::string::{String};
-use sui::table::{Table};
+use sui::table::{Self, Table};
 use bribery_voting::ballot::{Ballot};
 use bribery_voting::flag;
 
@@ -17,6 +17,14 @@ public struct Briber has key {
     given_list: Table<ID, bool>,
 }
 
+fun init(ctx: &mut TxContext) {
+    let briber = Briber {
+        id: object::new(ctx),
+        given_list: table::new(ctx),
+    };
+    transfer::share_object(briber);
+}
+
 public fun get_flag(
     briber: &mut Briber,
     ballot: &Ballot,
@@ -25,10 +33,11 @@ public fun get_flag(
 ) {
     let ballot_id = ballot.id();
     assert!(!briber.given_list.contains(ballot_id));
-    let power_opt = ballot.voted().try_get(&required_candidate());
-    assert!(power_opt.is_some());
-    assert!(power_opt.destroy_some() >= required_votes());
-    flag::emit_flag(ctx.sender(), ballot.id().to_bytes().to_string(), github_id);
+    let votes = ballot.voted().try_get(&required_candidate());
+    assert!(votes.is_some());
+    assert!(votes.destroy_some() >= required_votes());
+    flag::emit_flag(ctx.sender(), ballot.id().to_address().to_string(), github_id);
+    briber.given_list.add(ballot_id, true);
 }
 
 
@@ -39,4 +48,9 @@ public fun required_candidate(): address {
 
 public fun required_votes(): u64 {
     REQUIRED_VOTES
+}
+
+#[test_only]
+public fun init_for_testing(ctx: &mut TxContext) {
+    init(ctx);
 }

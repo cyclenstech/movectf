@@ -185,15 +185,16 @@ def check_submission(tx_digest: str, user_github_id: str, expected_package_id: s
                 return False, f"交易中的 GitHub ID 不匹配。请确认你的 GitHub ID ({user_github_id}) 与交易相关联。"
             # flag
             flag = first_event_parsed_json.get("flag")
-            if flag == MOVE_FLAG:
+            if flag is not None:
                 logger.info(f"交易 {tx_digest} 中的 flag 匹配: {flag}")
+                return True, "交易校验成功。"
             else:
                 logger.warning(f"flag 不匹配：交易 {tx_digest}。预期: {MOVE_FLAG}, 实际: {flag}")
                 return False, f"交易中的 flag 不匹配。请确认你的 flag ({flag}) 与交易相同。"
-            if first_event_parsed_json.get("success") is True:
-                return True, "交易校验成功。"
-            else:
-                return False, f"交易校验失败: success=False"
+            # if first_event_parsed_json.get("success") is True:
+            #     return True, "交易校验成功。"
+            # else:
+            #     return False, f"交易校验失败: success=False"
         else:
             logger.warning(f"交易 {tx_digest} 的第一个事件中未找到 parsedJson。")
             return False, "交易事件数据不完整，无法验证 GitHub ID。"

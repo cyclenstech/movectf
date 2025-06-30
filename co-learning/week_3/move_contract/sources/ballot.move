@@ -7,6 +7,7 @@ use sui::vec_map::{Self, VecMap};
 public struct Ballot has key {
     id: UID,
     voted: VecMap<address, u64>,
+    has_voted: bool,
 }
 
 /// Hot Potato
@@ -18,16 +19,21 @@ public struct VoteRequest {
 
 /// Public Funs
 
-public fun get_ballot(ctx: &mut TxContext) {
+public fun get_ballot(ctx: &mut TxContext): ID {
     let ballot = Ballot {
         id: object::new(ctx),
         voted: vec_map::empty(),
+        has_voted: false,
     };
+    let ballot_id = ballot.id();
     transfer::transfer(ballot, ctx.sender());
+    ballot_id
 }
 
-public fun request_vote(ballot: &Ballot): VoteRequest {
+public fun request_vote(ballot: &mut Ballot): VoteRequest {
     assert!(ballot.voted.is_empty());
+    assert!(!ballot.has_voted);
+    ballot.has_voted = true;
     VoteRequest {
         voting_power: default_voting_power(),
         voted: vec_map::empty(),

@@ -194,6 +194,7 @@ def check_submission(tx_digest: str, user_github_id: str, expected_package_id: s
             flag = first_event_parsed_json.get("flag")
             if flag:
                 logger.info(f"交易 {tx_digest} 中的 flag 匹配: {flag}")
+                return True, "交易校验成功。"
             else:
                 logger.warning(f"flag 不匹配：交易 {tx_digest}。预期: {MOVE_FLAG}, 实际: {flag}")
                 return False, f"交易中的 flag 不匹配。请确认你的 flag ({flag}) 与交易相同。"

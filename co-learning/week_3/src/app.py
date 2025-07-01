@@ -171,7 +171,7 @@ def check_submission(tx_digest: str, user_github_id: str, expected_package_id: s
     if events:
         # check package id
         tx_package_id = events[0].get("type")
-        if tx_package_id != f"{expected_package_id}::challenge::FlagEvent":
+        if tx_package_id != f"{expected_package_id}::flag::FlagEvent":
             logger.warning(f"PackageID 不匹配：交易 {tx_digest}。预期: {expected_package_id}, 实际: {tx_package_id}")
             return False, f"交易中的 PackageID 不匹配。请确认你的 PackageID ({tx_package_id}) 为实际部署合约。"
         first_event_parsed_json = events[0].get("parsedJson")

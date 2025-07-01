@@ -29,7 +29,7 @@ TRANSACTION_OPTIONS = {
 }
 
 # 挑战中需要用户提交的合约内部的 Flag，优先从环境变量 MOVE_CONTRACT_FLAG 获取
-MOVE_FLAG = os.getenv("MOVE_CONTRACT_FLAG", "CTF{MoveCTF-Task2}")
+MOVE_FLAG = os.getenv("MOVE_CONTRACT_FLAG", "CTF{MoveCTF-Task3}")
 
 # 服务器根 Flag 文件的路径，这是挑战成功的最终奖励。优先从环境变量 ROOT_FLAG_PATH 获取
 # 在生产环境中，这个文件通常会通过 Docker 或其他方式挂载到指定路径

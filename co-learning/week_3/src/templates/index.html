@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sui Move CTF 挑战：第2周任务</title>
+    <title>Sui Move CTF 挑战：第3周任务</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* 为整个页面设置默认字体 */
@@ -34,7 +34,7 @@
 </head>
 <body class="bg-gray-100 text-gray-900 min-h-screen flex items-center justify-center p-4">
     <div class="container bg-white p-8 rounded-lg shadow-xl w-full">
-        <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">Sui Move CTF 挑战：第2周任务</h1>
+        <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">Sui Move CTF 挑战：第3周任务</h1>
         <p class="text-center text-gray-700 mb-8">
             你的 GitHub ID：<span class="font-semibold text-blue-500">{{ github_id }}</span>
         </p>
@@ -67,9 +67,9 @@
         <hr class="my-8 border-gray-300">
 
         <div class="bg-green-50 border-l-4 border-green-400 text-green-800 p-4 mb-6 rounded" role="alert">
-            <p class="font-bold mb-2">提交你的 Flag</p>
+            <p class="font-bold mb-2">提交你的交易哈希</p>
             <p class="mb-4">
-                解题后，请将触发 Flag 的"交易哈希 (Transaction Digest)" 和合约返回的"Flag 值"提交到这里。
+                解题后，交易哈希 (Transaction Digest)" 提交到这里。
             </p>
             <form method="POST" action="/" class="space-y-4">
                 <div>
@@ -77,12 +77,6 @@
                     <input type="text" id="tx_digest" name="tx_digest" required
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                            placeholder="例如：0xabc123def456...">
-                </div>
-                <div>
-                    <label for="contract_flag_input" class="block text-gray-700 font-semibold mb-2">合约返回的 Flag 值:</label>
-                    <input type="text" id="contract_flag_input" name="contract_flag_input" required
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                           placeholder="例如：CTF{MoveCTF-Task2}">
                 </div>
                 <button type="submit"
                         class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out">

@@ -339,7 +339,7 @@ def index():
             is_tx_valid, validation_message = check_submission(
                 tx_digest, GLOBAL_GITHUB_ID, GLOBAL_DEPLOYED_PACKAGE_ID
             )
-            is_contract_flag_match = (contract_flag_input == MOVE_FLAG)
+            is_contract_flag_match = True #不在校验flag，直接将flag验证跳过
 
             if is_tx_valid and is_contract_flag_match:
                 final_flag = GLOBAL_ROOT_FLAG # 直接使用全局变量

@@ -6,7 +6,8 @@ module shopping::challenge {
 
     const EALREADYCLAIMED: u64 = 0;
     const EPAYPRICE: u64 = 1;
-    const EOWNER: u64 = 2;
+    const ENOTENOUGHBALANCE: u64 = 2;
+    const EOWNER: u64 = 3;
 
     public struct Card has key {
         id: UID,
@@ -36,7 +37,10 @@ module shopping::challenge {
         assert!(!(amt < market.get_labubu_price(i)), EPAYPRICE);
 
         let split_amt = amt << 30;
-        ((card.balance.value() << 30) - split_amt) >> 30;
+        
+        assert!(((card.balance.value() << 30) - split_amt) >= 0, ENOTENOUGHBALANCE);
+
+        market.pay(card.balance.split(split_amt >> 30));
         
         market::transfer_labubu_owner(market, i, ctx);
         transfer::public_transfer(market::get_labubu(market, i), ctx.sender());
@@ -59,7 +63,5 @@ module shopping::challenge {
 
         card.claimed = true;
     }
-
-
 
 }

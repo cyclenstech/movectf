@@ -1,13 +1,16 @@
 module shopping::market {
     use sui::bag::{Self, Bag};
+    use sui::balance::{Self, Balance};
     use std::string::String;
+    use shopping::sui::SUI;
 
     const LABUBU_PRICE: u64 = 5_000_000_000;
     const DECIMALS: u8 = 9;
 
     public struct Market has key {
         id: UID,
-        goods: Bag
+        goods: Bag,
+        balance: Balance<SUI>
     }
 
     public struct RestockCap has key {
@@ -28,7 +31,8 @@ module shopping::market {
 
         let mut market = Market {
             id: object::new(ctx),
-            goods: bag::new(ctx)
+            goods: bag::new(ctx),
+            balance: balance::zero<SUI>()
         };
 
         let labubu = Labubu {
@@ -70,5 +74,9 @@ module shopping::market {
 
     public(package) fun get_labubu(market: &mut Market, i: u64): Labubu {
         market.goods.borrow_mut<String, vector<Labubu>>(b"Labubu".to_string()).remove<Labubu>(i)
+    }
+
+    public(package) fun pay(market: &mut Market, balance: Balance<SUI>) {
+        market.balance.join(balance);
     }
 }

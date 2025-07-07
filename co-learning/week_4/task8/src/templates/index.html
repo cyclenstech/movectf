@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOH moveCTF共学：week4 加练</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 为整个页面设置默认字体 */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        /* 限制内容容器的最大宽度 */
+        .container {
+            max-width: 800px;
+        }
+        /* 自定义加载指示器样式 */
+        .loader {
+            border: 4px solid #f3f3f3; /* 浅灰色 */
+            border-top: 4px solid #3498db; /* 蓝色 */
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 2s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-900 min-h-screen flex items-center justify-center p-4">
+    <div class="container bg-white p-8 rounded-lg shadow-xl w-full">
+        <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">HOH moveCTF共学：week4 加练</h1>
+        <div class="bg-blue-50 border-l-4 border-blue-400 text-blue-800 p-4 mb-6 rounded" role="alert">
+            <p class="font-bold mb-2">挑战说明</p>
+            <p class="mb-4">
+                点击下方按钮开始挑战。平台将为你**部署一个独特的 Sui Move 合约**，并提供其 `package ID` 和部署 `交易哈希`。请使用这些信息与合约交互，并获取 Flag。
+            </p>
+            <button id="startChallengeBtn"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 ease-in-out flex items-center justify-center">
+                <span id="buttonText">开始挑战：部署你的专属合约</span>
+                <span id="buttonLoader" class="loader hidden"></span>
+            </button>
+            <div id="deploymentInfo" class="mt-4 p-3 text-sm rounded bg-gray-100 text-gray-800 hidden">
+                部署中，请稍候...
+            </div>
+            <div id="deploymentResult" class="mt-4 text-sm break-all">
+                {% if deployed_package_id != '未部署合约' %}
+                    <p class="text-green-700 font-bold mb-2">合约已部署！</p>
+                    <p><strong>Package ID:</strong> <code class="bg-gray-200 p-1 rounded font-mono break-all">{{ deployed_package_id }}</code></p>
+                    {% if deployed_tx_hash != '无' %}
+                        <p><strong>部署交易哈希:</strong> <code class="bg-gray-200 p-1 rounded font-mono break-all">{{ deployed_tx_hash }}</code></p>
+                    {% endif %}
+                    <p class="mt-2 text-blue-600">这是上次部署的合约信息，请使用它进行挑战。</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <hr class="my-8 border-gray-300">
+
+        <div class="bg-green-50 border-l-4 border-green-400 text-green-800 p-4 mb-6 rounded" role="alert">
+            <p class="font-bold mb-2">提交你的交易哈希</p>
+            <p class="mb-4">
+                解题后，交易哈希 (Transaction Digest)" 提交到这里。
+            </p>
+            <form method="POST" action="/" class="space-y-4">
+                <div>
+                    <label for="tx_digest" class="block text-gray-700 font-semibold mb-2">触发 Flag 的交易哈希 (Tx Digest):</label>
+                    <input type="text" id="tx_digest" name="tx_digest" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="例如：0xabc123def456...">
+                </div>
+                <button type="submit"
+                        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out">
+                    提交 Flag
+                </button>
+            </form>
+        </div>
+
+        {% if result_message %}
+            <div class="mt-6 p-4 rounded-lg
+                {% if '恭喜' in result_message %} bg-green-100 border-green-500 text-green-700 border {% else %} bg-red-100 border-red-500 text-red-700 border {% endif %}">
+                <p class="font-semibold">校验结果:</p>
+                <p>{{ result_message | safe }}</p>
+            </div>
+        {% endif %}
+
+        {% if flag_message %}
+            <div class="mt-4 p-4 rounded-lg bg-yellow-100 border-yellow-500 text-yellow-700 border">
+                <p class="font-semibold">最终 Flag:</p>
+                <p>{{ flag_message | safe }}</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('startChallengeBtn');
+            const buttonTextSpan = document.getElementById('buttonText');
+            const buttonLoaderSpan = document.getElementById('buttonLoader');
+            const deploymentInfoDiv = document.getElementById('deploymentInfo');
+            const deploymentResultDiv = document.getElementById('deploymentResult');
+
+            // 初始检查：如果页面初次加载时后端已经提供了部署信息，则不隐藏 `deploymentResultDiv`。
+            // 否则，确保它是空的，等待用户点击部署。
+            const initialPackageId = "{{ deployed_package_id }}"; // 从 Jinja2 获取初始值
+            if (initialPackageId === '未部署合约') {
+                deploymentResultDiv.innerHTML = ''; // 清空可能存在的“未部署合约”提示
+            }
+
+            btn.addEventListener('click', async () => {
+                // 禁用按钮并显示加载状态
+                btn.disabled = true;
+                buttonTextSpan.textContent = '部署中...';
+                buttonLoaderSpan.classList.remove('hidden'); // 显示加载器
+                
+                // 清空之前的部署结果并显示通用加载提示
+                deploymentResultDiv.innerHTML = ''; // 每次点击部署时清空之前的结果
+                deploymentInfoDiv.classList.remove('hidden'); // 显示部署提示信息框
+                deploymentInfoDiv.className = 'mt-4 p-3 text-sm rounded bg-gray-100 text-gray-800'; // 确保样式复位
+                deploymentInfoDiv.textContent = '正在向 Sui 网络部署合约，这可能需要一些时间，请耐心等待...';
+                
+
+                try {
+                    const response = await fetch('/start_challenge', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    const data = await response.json();
+
+                    if (data.status === 'success') {
+                        // 部署成功
+                        deploymentInfoDiv.classList.add('hidden'); // 隐藏加载提示
+                        deploymentResultDiv.innerHTML = `
+                            <p class="text-green-700 font-bold mb-2">${data.message}</p>
+                            <p><strong>Package ID:</strong> <code class="bg-gray-200 p-1 rounded font-mono break-all">${data.package_id}</code></p>
+                            <p><strong>部署交易哈希:</strong> <code class="bg-gray-200 p-1 rounded font-mono break-all">${data.transaction_hash}</code></p>
+                            <p class="mt-2 text-blue-600">请复制以上信息，开始你的解题之旅！</p>
+                        `;
+                        deploymentResultDiv.classList.remove('text-red-700'); // 确保移除红色文本
+                    } else {
+                        // 部署失败
+                        deploymentInfoDiv.classList.add('hidden'); // 隐藏加载提示
+                        deploymentResultDiv.innerHTML = `
+                            <p class="text-red-700 font-bold mb-2">${data.message}</p>
+                            <p>原因: ${data.details}</p>
+                            <p class="mt-2 text-red-600">请检查服务器日志或稍后再试。</p>
+                        `;
+                        deploymentResultDiv.classList.remove('text-green-700'); // 确保移除绿色文本
+                    }
+                } catch (error) {
+                    // 网络或请求错误
+                    console.error('部署合约时发生错误:', error);
+                    deploymentInfoDiv.classList.add('hidden'); // 隐藏加载提示
+                    deploymentResultDiv.innerHTML = `
+                        <p class="text-red-700 font-bold mb-2">请求部署时发生网络错误！</p>
+                        <p>请检查网络连接或服务器是否正常运行。</p>
+                    `;
+                    deploymentResultDiv.classList.remove('text-green-700'); // 确保移除红色文本
+                } finally {
+                    // 无论成功失败，恢复按钮状态
+                    btn.disabled = false;
+                    buttonTextSpan.textContent = '开始挑战：部署你的专属合约';
+                    buttonLoaderSpan.classList.add('hidden'); // 隐藏加载器
+                }
+            });
+        });
+    </script>
+</body>
+</html>

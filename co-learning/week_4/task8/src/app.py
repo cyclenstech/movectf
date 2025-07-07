@@ -175,35 +175,21 @@ def check_submission(tx_digest: str, user_github_id: str, expected_package_id: s
         tx_package_id = events[0].get("type")
         # 预期的事件类型格式应为 "{package_id}::module_name::EventName"
         # 确保我们只比较 package_id 部分
-        expected_event_prefix = f"{expected_package_id}::challenge::FlagEvent" # 假设事件名称是 FlagEvent
+        expected_event_prefix = f"{expected_package_id}::vault::Flag"
         if not tx_package_id.startswith(expected_package_id) or tx_package_id != expected_event_prefix:
             logger.warning(f"PackageID 或事件类型不匹配：交易 {tx_digest}。预期前缀: {expected_package_id}, 实际: {tx_package_id}")
             return False, f"交易中的 PackageID 或事件类型不匹配。请确认你的交易调用了部署的合约并触发了正确的事件 ({expected_event_prefix})。"
         
         first_event_parsed_json = events[0].get("parsedJson")
         if first_event_parsed_json:
-            # 移除对 GitHub ID 的校验
-            # parsed_github_id = first_event_parsed_json.get("github_id")
-            # if parsed_github_id == user_github_id:
-            #     logger.info(f"交易 {tx_digest} 中的 GitHub ID 匹配: {parsed_github_id}")
-            # else:
-            #     logger.warning(f"GitHub ID 不匹配：交易 {tx_digest}。预期: {user_github_id}, 实际: {parsed_github_id}")
-            #     return False, f"交易中的 GitHub ID 不匹配。请确认你的 GitHub ID ({user_github_id}) 与交易相关联。"
-            
             # 对 flag 的校验
-            flag = first_event_parsed_json.get("flag")
+            flag = first_event_parsed_json.get("win")
             if flag:
                 logger.info(f"交易 {tx_digest} 中的 flag 匹配: {flag}")
                 return True, "交易校验成功。"
             else:
                 logger.warning(f"flag 不匹配：交易 {tx_digest}。预期: {MOVE_FLAG}, 实际: {flag}")
                 return False, f"交易中的 flag 不匹配。请确认你的 flag ({flag}) 与交易相同。"
-            
-            # 移除检查 success 字段
-            # if first_event_parsed_json.get("success") is True:
-            #     return True, "交易校验成功。"
-            # else:
-            #     return False, f"交易校验失败: success=False"
         else:
             logger.warning(f"交易 {tx_digest} 的第一个事件中未找到 parsedJson。")
             return False, "交易事件数据不完整，无法验证。"
